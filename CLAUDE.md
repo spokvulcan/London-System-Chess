@@ -31,6 +31,7 @@ Only the simulator workflow is enabled by default; device/macOS/advanced workflo
 - Unit tests use the **Swift Testing** framework (`import Testing`, `@Test`, `#expect`), not XCTest. UI tests use XCTest.
 - **SwiftData** is the persistence layer. The `ModelContainer` is created in `London_System_ChessApp.swift` and injected via `.modelContainer(...)`; views read data with `@Query` and write through `@Environment(\.modelContext)`. When adding models, register them in the `Schema` in `London_System_ChessApp`.
 - Source type names are prefixed/underscored from the display name (e.g. `London_System_Chess`, bundle id `app.london-system.chess.London-System-Chess`).
+- **Commits follow the [Conventional Commits](https://www.conventionalcommits.org/) style** — `<type>(<optional scope>): <description>` (e.g. `feat(tabs): add five-section tab bar`). Common types: `feat`, `fix`, `docs`, `refactor`, `test`, `chore`.
 
 ## Agent skills
 
