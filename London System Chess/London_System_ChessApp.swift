@@ -25,7 +25,7 @@ struct London_System_ChessApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            AppView()
         }
         .modelContainer(sharedModelContainer)
     }

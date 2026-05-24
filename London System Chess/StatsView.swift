@@ -1,19 +1,20 @@
 //
-//  ContentView.swift
+//  StatsView.swift
 //  London System Chess
-//
-//  Created by Bohdan Ivanchenko on 25.05.2026.
 //
 
 import SwiftUI
 import SwiftData
 
-struct ContentView: View {
+/// The player's performance metrics over time. Not yet built — for now this
+/// hosts the parked SwiftData `Item` list (add/delete) so persistence stays
+/// exercised until real Stats models arrive.
+struct StatsView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var items: [Item]
 
     var body: some View {
-        NavigationSplitView {
+        NavigationStack {
             List {
                 ForEach(items) { item in
                     NavigationLink {
@@ -24,8 +25,9 @@ struct ContentView: View {
                 }
                 .onDelete(perform: deleteItems)
             }
+            .navigationTitle("Stats")
             .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
+                ToolbarItem(placement: .topBarTrailing) {
                     EditButton()
                 }
                 ToolbarItem {
@@ -34,15 +36,21 @@ struct ContentView: View {
                     }
                 }
             }
-        } detail: {
-            Text("Select an item")
+            .overlay {
+                if items.isEmpty {
+                    ContentUnavailableView(
+                        "No Stats Yet",
+                        systemImage: AppTab.stats.systemImage,
+                        description: Text("Parked Item data lives here for now.")
+                    )
+                }
+            }
         }
     }
 
     private func addItem() {
         withAnimation {
-            let newItem = Item(timestamp: Date())
-            modelContext.insert(newItem)
+            modelContext.insert(Item(timestamp: Date()))
         }
     }
 
@@ -56,6 +64,6 @@ struct ContentView: View {
 }
 
 #Preview {
-    ContentView()
+    StatsView()
         .modelContainer(for: Item.self, inMemory: true)
 }
