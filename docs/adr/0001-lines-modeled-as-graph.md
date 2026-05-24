@@ -1,0 +1,3 @@
+# Lines is modeled as a graph, not a tree
+
+The Lines section is the browsable reference of London System variations. Although openings are conventionally drawn as trees, we model Lines as a **graph**: because move orders **transpose** (different sequences reach the same position), identical positions are represented as a single shared node so converging lines meet rather than duplicate. A tree would be simpler but would either duplicate transposed positions or hide that they are the same; the graph is the truthful model and transpositions are central to understanding the London. This is recorded now because the decision is hard to reverse once the Lines data layer is built (which is out of scope for the current tab-bar scaffold).
