@@ -12,7 +12,7 @@ enum AppTab: Hashable, CaseIterable, Identifiable {
     case lines
     case daily
     case spar
-    case stats
+    case trends
     case me
 
     var id: Self { self }
@@ -22,7 +22,7 @@ enum AppTab: Hashable, CaseIterable, Identifiable {
         case .lines: "Lines"
         case .daily: "Daily"
         case .spar: "Spar"
-        case .stats: "Stats"
+        case .trends: "Trends"
         case .me: "Me"
         }
     }
@@ -32,7 +32,7 @@ enum AppTab: Hashable, CaseIterable, Identifiable {
         case .lines: "point.3.connected.trianglepath.dotted"
         case .daily: "sun.max"
         case .spar: "bolt"
-        case .stats: "chart.bar"
+        case .trends: "chart.line.uptrend.xyaxis"
         case .me: "person.crop.circle"
         }
     }
@@ -43,7 +43,7 @@ enum AppTab: Hashable, CaseIterable, Identifiable {
         case .lines: LinesView()
         case .daily: DailyView()
         case .spar: SparView()
-        case .stats: StatsView()
+        case .trends: TrendsView()
         case .me: MeView()
         }
     }

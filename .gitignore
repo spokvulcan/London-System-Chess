@@ -4,3 +4,6 @@ xcuserdata/
 
 # macOS
 .DS_Store
+
+# Python venv for the Lines mock-data authoring script (scripts/generate_lines_sample.py)
+.lines-authoring-venv/

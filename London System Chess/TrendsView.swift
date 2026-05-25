@@ -1,15 +1,15 @@
 //
-//  StatsView.swift
+//  TrendsView.swift
 //  London System Chess
 //
 
 import SwiftUI
 import SwiftData
 
-/// The player's performance metrics over time. Not yet built — for now this
+/// The player's performance trends over time. Not yet built — for now this
 /// hosts the parked SwiftData `Item` list (add/delete) so persistence stays
-/// exercised until real Stats models arrive.
-struct StatsView: View {
+/// exercised until real Trends models arrive.
+struct TrendsView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var items: [Item]
 
@@ -25,7 +25,7 @@ struct StatsView: View {
                 }
                 .onDelete(perform: deleteItems)
             }
-            .navigationTitle("Stats")
+            .navigationTitle("Trends")
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     EditButton()
@@ -39,8 +39,8 @@ struct StatsView: View {
             .overlay {
                 if items.isEmpty {
                     ContentUnavailableView(
-                        "No Stats Yet",
-                        systemImage: AppTab.stats.systemImage,
+                        "No Trends Yet",
+                        systemImage: AppTab.trends.systemImage,
                         description: Text("Parked Item data lives here for now.")
                     )
                 }
@@ -64,6 +64,6 @@ struct StatsView: View {
 }
 
 #Preview {
-    StatsView()
+    TrendsView()
         .modelContainer(for: Item.self, inMemory: true)
 }
