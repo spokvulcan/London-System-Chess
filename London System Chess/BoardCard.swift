@@ -35,21 +35,25 @@ struct BoardCard: View {
     @ViewBuilder
     private func card(for position: LinePosition) -> some View {
         let continuations = graph.moves(from: position.id)
-        VStack(alignment: .leading, spacing: 16) {
-            header(for: position)
+        // The close button is glass and sits on the card's glass surface; a
+        // container lets the two blend instead of stacking glass-on-glass.
+        GlassEffectContainer {
+            VStack(alignment: .leading, spacing: 16) {
+                header(for: position)
 
-            ChessBoardView(fen: position.fen)
-                .frame(maxWidth: .infinity)
+                ChessBoardView(fen: position.fen)
+                    .frame(maxWidth: .infinity)
 
-            masteryRow(for: position.mastery)
+                masteryRow(for: position.mastery)
 
-            if !continuations.isEmpty {
-                Divider()
-                continuationList(continuations)
+                if !continuations.isEmpty {
+                    Divider()
+                    continuationList(continuations)
+                }
             }
+            .padding(20)
+            .glassEffect(.regular, in: .rect(cornerRadius: 28))
         }
-        .padding(20)
-        .glassEffect(.regular, in: .rect(cornerRadius: 28))
     }
 
     private func header(for position: LinePosition) -> some View {

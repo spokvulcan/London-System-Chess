@@ -30,6 +30,10 @@ struct LinesColumnsView: View {
     @Environment(\.horizontalSizeClass) private var hSize
 
     private let byID: [LinePosition.ID: LinePosition]
+    /// Outgoing edges keyed by source id, built once — the columns query replies
+    /// from a position constantly (per column, per row), so a cached adjacency
+    /// avoids re-scanning the whole move list on every render.
+    private let movesFrom: [LinePosition.ID: [LineMove]]
     private let columnWidth: CGFloat = 212
 
     init(graph: LinesGraph, selectedID: Binding<LinePosition.ID?>, focusID: LinePosition.ID?, focusTick: Int) {
@@ -38,7 +42,11 @@ struct LinesColumnsView: View {
         self.focusID = focusID
         self.focusTick = focusTick
         self.byID = graph.positionsByID
+        self.movesFrom = Dictionary(grouping: graph.moves, by: \.from)
     }
+
+    /// Replies from a position, from the cached adjacency.
+    private func replies(from id: LinePosition.ID) -> [LineMove] { movesFrom[id] ?? [] }
 
     var body: some View {
         Group {
@@ -100,7 +108,7 @@ struct LinesColumnsView: View {
     }
 
     private func sortedMoves(from id: LinePosition.ID) -> [LineMove] {
-        graph.moves(from: id).sorted { a, b in
+        replies(from: id).sorted { a, b in
             if a.coverage != b.coverage { return a.coverage > b.coverage }
             return a.san < b.san
         }
@@ -154,7 +162,7 @@ struct LinesColumnsView: View {
         let destination = byID[move.to]
         let isSelected = column.selectedDestination == move.to
         let isFocus = move.to == pulseTargetID
-        let hasReplies = !graph.moves(from: move.to).isEmpty
+        let hasReplies = !replies(from: move.to).isEmpty
         return Button {
             select(move, atColumn: column.index)
         } label: {
@@ -207,7 +215,16 @@ struct LinesColumnsView: View {
             }
         }
         .buttonStyle(.plain)
+        .accessibilityLabel(rowAccessibilityLabel(move, destination: destination, isFocus: isFocus))
         .accessibilityIdentifier("col-\(column.index)-\(move.san)")
+    }
+
+    private func rowAccessibilityLabel(_ move: LineMove, destination: LinePosition?, isFocus: Bool) -> String {
+        var parts = [move.san]
+        if let mastery = destination?.mastery { parts.append(MasteryStyle.summary(for: mastery)) }
+        if destination?.isTransposition == true { parts.append("transposition") }
+        if isFocus { parts.append("suggested focus") }
+        return parts.joined(separator: ", ")
     }
 
     private func select(_ move: LineMove, atColumn index: Int) {
@@ -245,7 +262,7 @@ struct LinesColumnsView: View {
         var sans: [String] = []
         var parent = root.id
         for dest in path {
-            if let mv = graph.moves(from: parent).first(where: { $0.to == dest }) {
+            if let mv = replies(from: parent).first(where: { $0.to == dest }) {
                 sans.append(mv.san)
             }
             parent = dest
@@ -304,7 +321,7 @@ struct LinesColumnsView: View {
         while !queue.isEmpty {
             let trail = queue.removeFirst()
             guard let last = trail.last else { continue }
-            for move in graph.moves(from: last) {
+            for move in replies(from: last) {
                 if move.to == target { return Array((trail + [move.to]).dropFirst()) }
                 if seen.insert(move.to).inserted { queue.append(trail + [move.to]) }
             }

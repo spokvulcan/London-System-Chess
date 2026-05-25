@@ -158,6 +158,15 @@ struct LinesMapView: View {
             }
         }
         .buttonStyle(.plain)
+        // The tab is about reading progress, so announce the mastery, not just the move.
+        .accessibilityLabel(accessibilityLabel(for: position, isFocus: isFocus))
+    }
+
+    private func accessibilityLabel(for position: LinePosition, isFocus: Bool) -> String {
+        var parts = [position.label, MasteryStyle.summary(for: position.mastery)]
+        if position.isTransposition { parts.append("transposition") }
+        if isFocus { parts.append("suggested focus") }
+        return parts.joined(separator: ", ")
     }
 
     // MARK: Controls
