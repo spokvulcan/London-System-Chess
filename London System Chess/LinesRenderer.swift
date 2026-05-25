@@ -3,7 +3,7 @@
 //  London System Chess
 //
 //  The two interchangeable ways to visualize the same LinesGraph (ADR 0002),
-//  selected by the toolbar segmented toggle. Built to be compared head-to-head
+//  selected by the grouped glass toolbar toggle. Built to be compared head-to-head
 //  for which one teaches the London better.
 //
 
