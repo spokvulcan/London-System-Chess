@@ -3,7 +3,7 @@
 //  London System Chess
 //
 //  The Lines tab shell: the variation graph rendered two interchangeable ways
-//  (ADR 0002), switched by a toolbar segmented toggle, over one shared LinesGraph.
+//  (ADR 0002), switched by a grouped glass toolbar toggle, over one shared LinesGraph.
 //  Selecting any node/move presents a floating board card; the focus affordance
 //  jumps to the single most-urgent weak spot (derived from Mastery only — the
 //  Lines/Trends boundary in CONTEXT.md).
@@ -43,24 +43,42 @@ struct LinesView: View {
     private var renderedGraph: some View {
         switch renderer {
         case .map:
-            LinesMapView(graph: graph, selectedID: $selectedID, focusID: focusID, focusTick: focusTick)
+            // Host the canvas in a scroll view whose content underlaps the toolbar.
+            // That's what drives iOS 26's *native* navigation-bar Liquid Glass (the
+            // soft scroll-edge effect, same as the Trends list) — the bar isn't a flat
+            // material we paint, it's the system frosting whatever canvas sits under it.
+            // The map keeps its own pan/zoom gestures; the scroll view doesn't scroll
+            // (content fills the viewport), it's purely the surface the glass reads.
+            ScrollView([.horizontal, .vertical]) {
+                LinesMapView(graph: graph, selectedID: $selectedID, focusID: focusID, focusTick: focusTick)
+                    .containerRelativeFrame([.horizontal, .vertical])
+            }
+            .scrollDisabled(true)
+            .scrollEdgeEffectStyle(.soft, for: .top)
+            .ignoresSafeArea(.container, edges: .top)
         case .columns:
+            // Columns keeps its content below the bar: its top edge is a breadcrumb
+            // and column headers that shouldn't slide under the glass. The bar still
+            // shows glass; it just doesn't get the full content-blur the map does.
             LinesColumnsView(graph: graph, selectedID: $selectedID, focusID: focusID, focusTick: focusTick)
         }
     }
 
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
-        ToolbarItem(placement: .principal) {
-            Picker("Renderer", selection: $renderer) {
-                ForEach(LinesRenderer.allCases) { renderer in
-                    Text(renderer.title)
-                        .tag(renderer)
-                        .accessibilityIdentifier("renderer-\(renderer.title)")
+        // Grouped glass renderer toggle (ADR 0002): one shared Liquid Glass capsule
+        // holding both icons, the active renderer filled with the accent. Leading, so
+        // the inline "Lines" title centers and Focus stays trailing. A single shared
+        // pill (not two independent glass buttons) keeps the inactive option visible
+        // even over the empty/white parts of the canvas.
+        ToolbarItem(placement: .topBarLeading) {
+            HStack(spacing: 2) {
+                ForEach(LinesRenderer.allCases) { option in
+                    rendererButton(option)
                 }
             }
-            .pickerStyle(.segmented)
-            .frame(maxWidth: 280)
+            .padding(3)
+            .glassEffect(.regular, in: .capsule)
             .accessibilityIdentifier("renderer-picker")
         }
         ToolbarItem(placement: .topBarTrailing) {
@@ -72,6 +90,28 @@ struct LinesView: View {
             .disabled(focusID == nil)
             .accessibilityIdentifier("focus-button")
         }
+    }
+
+    @ViewBuilder
+    private func rendererButton(_ option: LinesRenderer) -> some View {
+        let isActive = renderer == option
+        Button {
+            withAnimation(.snappy) { renderer = option }
+        } label: {
+            Image(systemName: option.systemImage)
+                .font(.body)
+                .frame(width: 42, height: 30)
+                .foregroundStyle(isActive ? Color.white : Color.primary)
+                .background {
+                    if isActive {
+                        Capsule().fill(Color.accentColor)
+                    }
+                }
+                .accessibilityLabel(option.title)
+        }
+        .buttonStyle(.plain)
+        .accessibilityIdentifier("renderer-\(option.title)")
+        .accessibilityAddTraits(isActive ? .isSelected : [])
     }
 }
 
