@@ -13,6 +13,11 @@ import SwiftUI
 struct BoardCard: View {
     let graph: LinesGraph
     @Binding var selectedID: LinePosition.ID?
+    /// Positions already in the repertoire (carrying a ReviewCard).
+    var learnedIDs: Set<LinePosition.ID> = []
+    /// Present = the card offers the Learn action (CONTEXT.md: Learning) —
+    /// called with the selected position; the owner creates the cards.
+    var onLearn: ((LinePosition.ID) -> Void)? = nil
 
     var body: some View {
         if let id = selectedID, let position = graph.positionsByID[id] {
@@ -45,6 +50,8 @@ struct BoardCard: View {
                     .frame(maxWidth: .infinity)
 
                 masteryRow(for: position.mastery)
+
+                learnRow(for: position)
 
                 if !continuations.isEmpty {
                     Divider()
@@ -90,6 +97,34 @@ struct BoardCard: View {
             Text(MasteryStyle.summary(for: mastery))
                 .font(.subheadline)
             Spacer()
+        }
+    }
+
+    /// The Learn action: one tap puts the whole line down to this position into
+    /// the repertoire (a card per unlearned White-to-move spot on the path).
+    /// The full learning sheet replaces this minimal flow later.
+    @ViewBuilder
+    private func learnRow(for position: LinePosition) -> some View {
+        if let onLearn {
+            let navigator = RepertoireNavigator(graph: graph)
+            let newCount = navigator.learnablePositions(to: position.id, learned: learnedIDs).count
+            if newCount > 0 {
+                Button {
+                    withAnimation(.snappy) { onLearn(position.id) }
+                } label: {
+                    Label("Learn line to here", systemImage: "plus.circle.fill")
+                        .font(.subheadline.weight(.semibold))
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.glassProminent)
+            } else if learnedIDs.contains(position.id) || !navigator.isCardEligible(position.id) {
+                Label(
+                    learnedIDs.contains(position.id) ? "In your repertoire" : "Line learned to here",
+                    systemImage: "checkmark.seal.fill"
+                )
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+            }
         }
     }
 

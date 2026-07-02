@@ -3,8 +3,10 @@
 //  London System Chess
 //
 //  Renders an actual chess position from a FEN string. Used by the board card so
-//  the player sees the real position behind any node. Pieces are Unicode glyphs
-//  tinted by color; the board is White-at-bottom.
+//  the player sees the real position behind any node, and by Daily's line-walks,
+//  where it also takes input: tap your piece, tap the destination. Interaction is
+//  opt-in via `onSquareTap` — render-only callers are untouched. Pieces are
+//  Unicode glyphs tinted by color; the board is White-at-bottom.
 //
 
 import SwiftUI
@@ -12,6 +14,12 @@ import SwiftUI
 struct ChessBoardView: View {
     /// Full or placement-only FEN. Only the piece-placement field is read.
     let fen: String
+    /// The square the player has picked up a piece from, e.g. "e2".
+    var selectedSquare: String? = nil
+    /// Square → tint overlays (last move, reveal, wrong-answer flash).
+    var highlights: [String: Color] = [:]
+    /// Present = the board takes input; called with the tapped square name.
+    var onSquareTap: ((String) -> Void)? = nil
 
     private let light = Color(red: 0.93, green: 0.90, blue: 0.82)
     private let dark = Color(red: 0.46, green: 0.58, blue: 0.40)
@@ -25,9 +33,17 @@ struct ChessBoardView: View {
                 ForEach(0..<8, id: \.self) { row in
                     HStack(spacing: 0) {
                         ForEach(0..<8, id: \.self) { col in
+                            let name = Self.squareName(row: row, col: col)
                             ZStack {
                                 Rectangle()
                                     .fill((row + col).isMultiple(of: 2) ? light : dark)
+                                if let tint = highlights[name] {
+                                    Rectangle().fill(tint.opacity(0.5))
+                                }
+                                if name == selectedSquare {
+                                    Rectangle()
+                                        .strokeBorder(.yellow, lineWidth: max(2, square * 0.06))
+                                }
                                 if let piece = ranks[safe: row]?[safe: col] ?? nil {
                                     Text(Self.glyph(for: piece))
                                         .font(.system(size: square * 0.78))
@@ -36,6 +52,8 @@ struct ChessBoardView: View {
                                 }
                             }
                             .frame(width: square, height: square)
+                            .contentShape(Rectangle())
+                            .onTapGesture { onSquareTap?(name) }
                         }
                     }
                 }
@@ -45,6 +63,22 @@ struct ChessBoardView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .aspectRatio(1, contentMode: .fit)
+    }
+
+    /// Algebraic square name; row 0 = rank 8, col 0 = file a (White at bottom).
+    static func squareName(row: Int, col: Int) -> String {
+        let file = Character(UnicodeScalar(97 + col)!)
+        return "\(file)\(8 - row)"
+    }
+
+    /// The piece character on a square, from a FEN placement (uppercase = White).
+    static func piece(at square: String, in fen: String) -> Character? {
+        guard square.count == 2,
+              let file = square.first?.asciiValue, (97...104).contains(file),
+              let rank = square.last?.wholeNumberValue, (1...8).contains(rank)
+        else { return nil }
+        let ranks = placement(from: fen)
+        return ranks[safe: 8 - rank]?[safe: Int(file) - 97] ?? nil
     }
 
     /// Expands the FEN placement field into 8 ranks (row 0 = rank 8) of optional

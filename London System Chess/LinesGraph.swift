@@ -72,6 +72,10 @@ struct LineMove: Identifiable, Hashable, Codable {
     let to: LinePosition.ID
     /// Standard algebraic notation, e.g. "Bf4".
     let san: String
+    /// UCI notation — origin + destination squares (+ promotion), e.g. "c1f4".
+    /// This is what tap-to-answer input is matched against; no move-legality
+    /// engine exists in the app, so the stored squares are the ground truth.
+    let uci: String
     /// The side that played this move.
     let side: SideToMove
     /// Per-move reliability (nil = unknown), the expanded level of detail.

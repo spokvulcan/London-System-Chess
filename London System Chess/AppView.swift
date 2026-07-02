@@ -24,5 +24,5 @@ struct AppView: View {
 
 #Preview {
     AppView()
-        .modelContainer(for: Item.self, inMemory: true)
+        .modelContainer(for: ReviewCard.self, inMemory: true)
 }

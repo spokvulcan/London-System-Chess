@@ -99,13 +99,15 @@ for line in LINES:
     ply = 0
     for token in line.split():
         mover = "white" if board.turn == chess.WHITE else "black"
-        board.push_san(token)  # raises on an illegal/typo move — our correctness gate
+        move = board.parse_san(token)  # raises on an illegal/typo move — our correctness gate
+        uci = move.uci()
+        board.push(move)
         ply += 1
         cur_key = ensure_node(board, ply, token, mover)
         parents[cur_key].add(prev_key)
         edges.setdefault(
             (prev_key, token, cur_key),
-            {"from": prev_key, "to": cur_key, "san": token, "side": mover},
+            {"from": prev_key, "to": cur_key, "san": token, "uci": uci, "side": mover},
         )
         prev_key = cur_key
 
@@ -209,6 +211,7 @@ for e in sorted(edges.values(), key=lambda x: (nodes[x["from"]]["ply"], x["san"]
         f"from: {swift_str(e['from'])}, "
         f"to: {swift_str(e['to'])}, "
         f"san: {swift_str(e['san'])}, "
+        f"uci: {swift_str(e['uci'])}, "
         f"side: .{e['side']}, "
         f"reliability: {swift_opt_double(e['reliability'])}, "
         f"coverage: {e['coverage']:.2f}),"

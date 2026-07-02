@@ -4,66 +4,21 @@
 //
 
 import SwiftUI
-import SwiftData
 
-/// The player's performance trends over time. Not yet built — for now this
-/// hosts the parked SwiftData `Item` list (add/delete) so persistence stays
-/// exercised until real Trends models arrive.
+/// The player's performance trends over time. Not yet built.
 struct TrendsView: View {
-    @Environment(\.modelContext) private var modelContext
-    @Query private var items: [Item]
-
     var body: some View {
         NavigationStack {
-            List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))")
-                    } label: {
-                        Text(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))
-                    }
-                }
-                .onDelete(perform: deleteItems)
-            }
+            ContentUnavailableView(
+                "No Trends Yet",
+                systemImage: AppTab.trends.systemImage,
+                description: Text("Trends over your real games will appear here.")
+            )
             .navigationTitle("Trends")
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    EditButton()
-                }
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
-                    }
-                }
-            }
-            .overlay {
-                if items.isEmpty {
-                    ContentUnavailableView(
-                        "No Trends Yet",
-                        systemImage: AppTab.trends.systemImage,
-                        description: Text("Parked Item data lives here for now.")
-                    )
-                }
-            }
-        }
-    }
-
-    private func addItem() {
-        withAnimation {
-            modelContext.insert(Item(timestamp: Date()))
-        }
-    }
-
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            for index in offsets {
-                modelContext.delete(items[index])
-            }
         }
     }
 }
 
 #Preview {
     TrendsView()
-        .modelContainer(for: Item.self, inMemory: true)
 }

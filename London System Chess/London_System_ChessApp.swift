@@ -12,7 +12,8 @@ import SwiftData
 struct London_System_ChessApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
-            Item.self,
+            ReviewCard.self,
+            ReviewLogEntry.self,
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
