@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		FA5750032FC3A32400000003 /* FSRS in Frameworks */ = {isa = PBXBuildFile; productRef = FA5750022FC3A32400000002 /* FSRS */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		E0F153A02FC3A32400B5B55B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -65,6 +69,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FA5750032FC3A32400000003 /* FSRS in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -125,6 +130,7 @@
 			);
 			name = "London System Chess";
 			packageProductDependencies = (
+				FA5750022FC3A32400000002 /* FSRS */,
 			);
 			productName = "London System Chess";
 			productReference = E0F1538E2FC3A32200B5B55B /* London System Chess.app */;
@@ -208,6 +214,9 @@
 			);
 			mainGroup = E0F153852FC3A32200B5B55B;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				FA5750012FC3A32400000001 /* XCRemoteSwiftPackageReference "swift-fsrs" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = E0F1538F2FC3A32200B5B55B /* Products */;
 			projectDirPath = "";
@@ -595,6 +604,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		FA5750012FC3A32400000001 /* XCRemoteSwiftPackageReference "swift-fsrs" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/open-spaced-repetition/swift-fsrs.git";
+			requirement = {
+				kind = revision;
+				revision = 4fbaf20184d62f82a9f44f343337c61a2c5483e9;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		FA5750022FC3A32400000002 /* FSRS */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FA5750012FC3A32400000001 /* XCRemoteSwiftPackageReference "swift-fsrs" */;
+			productName = FSRS;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = E0F153862FC3A32200B5B55B /* Project object */;
 }

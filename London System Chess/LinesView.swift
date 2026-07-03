@@ -10,9 +10,24 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct LinesView: View {
-    private let graph = LinesGraph.sample
+    @Environment(\.modelContext) private var modelContext
+    @Query private var cards: [ReviewCard]
+
+    /// The theory graph — structure from the sample, mock mastery replaced by
+    /// the player's real persisted records (the sample's numbers never show here).
+    private var graph: LinesGraph {
+        MasteryPainting.painted(
+            LinesGraph.sample,
+            records: Dictionary(
+                uniqueKeysWithValues: cards.map { ($0.positionID, MasteryPainting.CardSnapshot($0)) }
+            )
+        )
+    }
+
+    private var learnedIDs: Set<LinePosition.ID> { Set(cards.map(\.positionID)) }
 
     @State private var renderer: LinesRenderer = .map
     @State private var selectedID: LinePosition.ID?
@@ -34,8 +49,22 @@ struct LinesView: View {
                     .navigationBarTitleDisplayMode(.inline)
                     .toolbar { toolbarContent }
 
-                BoardCard(graph: graph, selectedID: $selectedID)
+                BoardCard(
+                    graph: graph,
+                    selectedID: $selectedID,
+                    learnedIDs: learnedIDs,
+                    onLearn: learn(to:)
+                )
             }
+        }
+    }
+
+    /// The (minimal) Learn action: one card per unlearned White-to-move position
+    /// on the path from the start to the picked node (CONTEXT.md: Learning).
+    private func learn(to id: LinePosition.ID) {
+        let navigator = RepertoireNavigator(graph: graph)
+        for positionID in navigator.learnablePositions(to: id, learned: learnedIDs) {
+            modelContext.insert(ReviewCard(positionID: positionID))
         }
     }
 
@@ -117,4 +146,5 @@ struct LinesView: View {
 
 #Preview {
     LinesView()
+        .modelContainer(for: ReviewCard.self, inMemory: true)
 }
